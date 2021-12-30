@@ -1,50 +1,35 @@
-var User=require('./models/user.js');
-var express=require('express');
-var app=express();
-app.use(express.static(__dirname));
-app.get('/',function(req,res){
- res.sendFile(__dirname+'/index.html');
-})
+const morgan = require('morgan');
+const cors = require('cors');
 
-app.listen(process.env.PORT||8088);
+const express = require('express')
+const app = express()
 
-console.log('Run server!');
+const mongoose = require('mongoose');
 
-var bodyParser=require('body-parser');
-app.use(bodyParser.urlencoded({ extended: false }))
-app.use(bodyParser.json())
+const config = require('./config');
+const mainRouter = require('./routes/main.router');
 
+_connectDB();
 
-var fs=require('fs');
+app.use(cors({
+  origin: 'http://localhost:4200'
+}));
+app.use(express.json());
+app.use(express.urlencoded({extended: true}));
+app.use(morgan('dev'));
 
-app.get('/getusers',function(req,res){
- User.find(function(err,data){
+app.use('/', mainRouter);
 
- res.send(data);
- })
-})
+function _connectDB() {
+  mongoose.connect('mongodb+srv://Mary:qjhr@cluster0.zlxb1.mongodb.net/Cluster0?retryWrites=true&w=majority' , { useNewUrlParser: true, useUnifiedTopology: true });
 
-app.post('/adduser',function(req,res){
+  const { connection } = mongoose;
 
- var user=new User(req.body);
- user.save(function(err,data){
- if(err) console.log(err.message);
+  connection.on('error', err => {
+    console.log(err);
+  });
+}
 
- res.send(data);
- })
-})
-
-app.post('/deleteuser',function(req,res){
- User.remove({_id:req.body.id},function(err,data){
- res.send("remove user");
- })
-})
-
-app.post('/updateuser',function(req,res){
-    console.log(req.body);
-    console.log('\n');
-    User.findByIdAndUpdate(req.body._id, {$set: req.body}, function (err, product) {
-        if (err) return next(err);
-        res.send('User udpated.');
-    });
-})
+app.listen(config.PORT, () => {
+  console.log(`App listen ${config.PORT}`);
+});
