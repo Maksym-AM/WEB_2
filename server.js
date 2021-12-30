@@ -1,32 +1,25 @@
-const path = require('path')
-
-// встановлюємо express
-const express = require('express')
-const app = express()
-
-// встановлюємо директорію для віддачі статичного контенту (каталог проекту)
-app.use(express.static(__dirname))
-
-// налаштовуємо роботу із шаблонізаотором
-app.set('views', path.join(__dirname, '/static/views'))
-app.set('view engine', 'pug')
-
-// налаштовуємо маршрутизацію
-app.get('/', function (request, response) {
-  response.render('pages/index', { title: 'Home' })
+//підключаємо модуль express
+var express=require('express');
+//створюємо проект
+var app=express();
+//папка для віддачі статичного контенту (каталог проекту)
+app.use(express.static(__dirname));
+//опрацювання кореневого шляху -віддати клієнту index.html
+app.get('/',function(req,res){
+ res.sendFile(__dirname+'/index.html');
+ 
 })
-app.get('/passenger', function (request, response) {
-  response.render('pages/passenger', { title: 'Passenger' })
-})
-app.get('/ticket', function (request, response) {
-  response.render('pages/ticket', { title: 'Ticket' })
-})
-app.get('/train', function (request, response) {
-  response.render('pages/train', { title: 'train' })
-})
-app.get('/sold_tickets', function (request, response) {
-  response.render('pages/sold_tickets', { title: 'sold' })
-})
-// запускаємо аплікацію
-app.listen(process.env.PORT || 8082)
+//порт прослуховування для сервера
+//автоматичний підбір для віддаленого сервера,
+//або 8080 для localhost
+app.listen(process.env.PORT||8080);
+//повідомлення про запуск сервера
+console.log('Run server!');
 
+var fs=require('fs');
+app.get('/getusers',function(req,res){
+ fs.readFile('data.json','utf-8',function(err,data){
+ console.log(data);
+ res.send(data);
+ })
+})
